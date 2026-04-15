@@ -481,8 +481,10 @@ class AxiMasterWrite(Region, Reset):
             word_addr = (cmd.address // self.byte_lanes) * self.byte_lanes
 
             start_offset = cmd.address % self.byte_lanes
-            end_offset = ((cmd.address + len(cmd.data) - 1) % self.byte_lanes) + 1
+            #start_offset = 0
 
+            end_offset = ((cmd.address + len(cmd.data) - 1) % self.byte_lanes) + 1
+            #end_offset = start_offset + len(cmd.data)
             cycles = (len(cmd.data) + (cmd.address % num_bytes) + num_bytes-1) // num_bytes
 
             cur_addr = cmd.address
@@ -590,7 +592,9 @@ class AxiMasterWrite(Region, Reset):
             b = await self.b_channel.recv()
 
             bid = int(getattr(b, 'bid', 0))
-
+            #self.log.info("WRITE RESP received: BID = 0x%x BVALID=%d", bid, int(b.bvalid))
+            # b valid not an attribute of axib transaction 
+            self.log.info("WRITE RESP received: BID = 0x%x ", bid)
             assert self.active_id[bid] > 0, "unexpected burst ID"
 
             self.tag_context_manager.put_resp(bid, b)
